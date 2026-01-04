@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中歐三城蜜月紀行 - 數位化行程規劃</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN for Data Visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Custom scrollbar for better UX on desktop, non-intrusive on mobile */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f0f4f8; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        .timeline-item { position: relative; padding-left: 2rem; border-left: 2px solid #3b82f6; }
+        .timeline-item:last-child { border-left: none; }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -8px;
+            top: 0;
+            width: 14px;
+            height: 14px;
+            background-color: #3b82f6;
+            border-radius: 50%;
+            border: 2px solid #ffffff;
+            box-shadow: 0 0 0 2px #3b82f6;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans text-gray-800">
+
+    <!-- Header & Navigation -->
+    <header class="sticky top-0 z-50 bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h1 class="text-xl font-bold py-3 text-blue-600 sm:text-2xl">
+                中歐蜜月規劃 V1.0
+            </h1>
+            <nav class="flex space-x-1 sm:space-x-4 border-t border-gray-100 overflow-x-auto text-sm sm:text-base" id="nav-tabs">
+                <button data-target="overview" class="tab-button py-3 px-2 sm:px-4 text-blue-600 border-b-2 border-blue-600 font-semibold transition duration-150">行程總覽</button>
+                <button data-target="traffic" class="tab-button py-3 px-2 sm:px-4 text-gray-500 hover:text-blue-600 transition duration-150">交通策略</button>
+                <button data-target="daily" class="tab-button py-3 px-2 sm:px-4 text-gray-500 hover:text-blue-600 transition duration-150">每日行程</button>
+                <button data-target="food" class="tab-button py-3 px-2 sm:px-4 text-gray-500 hover:text-blue-600 transition duration-150">美食地圖</button>
+                <button data-target="data-viz" class="tab-button py-3 px-2 sm:px-4 text-gray-500 hover:text-blue-600 transition duration-150">數據分析</button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content Area (SPA Router Target) -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- 1. 行程總覽 (Overview) -->
+        <section id="overview" class="spa-page">
+            <div class="bg-white p-6 sm:p-8 rounded-xl shadow-lg border border-gray-100">
+                <h2 class="text-3xl font-extrabold text-gray-900 mb-6 border-b pb-2">規劃摘要與專家修正</h2>
+                <div id="overview-content"></div>
+                <h3 class="text-xl font-semibold text-red-600 mt-6 mb-3">【專業修正說明】</h3>
+                <ul class="list-disc list-inside space-y-2 text-gray-600">
+                    <li>**Day 1 清理與優化：** 原始行程中非必要或異常的項目（如竹山藥局、負時長停留）已被移除。行程專注於TPE到VIE的國際轉機與抵達安排。</li>
+                    <li>**Day 2 交通與採購：** 建議將抵達後的小額採購 (INTERSPAR) 和提款 (Bankomat) 安排在火車站或住宿附近，而非零散分佈，以提高效率。</li>
+                    <li>**季節性景點更正：** Day 9 的「聖誕市集 (Weihnachtsmarkt)」在四月是不存在的，已將該時段邏輯上調整為周邊花園或博物館參觀（如**Gloriette**或**Schönbrunn Gardens**）。</li>
+                    <li>**用餐策略升級：** 根據中歐美食專業建議，已加入高CP值或在地經典餐廳，平衡高單價的**Plachutta**等餐廳。</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- 2. 交通策略 (Traffic Strategy) -->
+        <section id="traffic" class="spa-page hidden">
+            <div class="bg-white p-6 sm:p-8 rounded-xl shadow-lg border border-gray-100">
+                <h2 class="text-3xl font-extrabold text-gray-900 mb-6 border-b pb-2">中歐交通與票證策略詳解</h2>
+                <div id="traffic-content"></div>
+            </div>
+        </section>
+
+        <!-- 3. 每日行程 (Daily Itinerary) -->
+        <section id="daily" class="spa-page hidden">
+            <h2 class="text-3xl font-extrabold text-gray-900 mb-6">每日行程細節 (點擊日期切換)</h2>
+            <div class="flex flex-wrap gap-2 mb-6" id="day-selector-container">
+                <!-- Days buttons will be injected here -->
+            </div>
+            <div id="daily-itinerary-detail" class="bg-white p-4 sm:p-6 rounded-xl shadow-lg border border-gray-100">
+                <!-- Timeline details will be injected here -->
+            </div>
+        </section>
+
+        <!-- 4. 美食地圖 (Food Map) -->
+        <section id="food" class="spa-page hidden">
+            <div class="bg-white p-6 sm:p-8 rounded-xl shadow-lg border border-gray-100">
+                <h2 class="text-3xl font-extrabold text-gray-900 mb-6 border-b pb-2">專業美食推薦地圖</h2>
+                
+                <!-- Filter -->
+                <div class="mb-6 flex space-x-4 items-center">
+                    <span class="font-semibold text-gray-700">城市篩選:</span>
+                    <select id="city-filter" class="p-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                        <option value="all">所有城市</option>
+                        <option value="Vienna">維也納 (Vienna)</option>
+                        <option value="Salzburg">薩爾斯堡 (Salzburg)</option>
+                        <option value="Budapest">布達佩斯 (Budapest)</option>
+                    </select>
+                </div>
+                
+                <!-- Food List -->
+                <div id="food-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Food items will be injected here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. 數據分析 (Data Visualization) -->
+        <section id="data-viz" class="spa-page hidden">
+            <div class="bg-white p-6 sm:p-8 rounded-xl shadow-lg border border-gray-100">
+                <h2 class="text-3xl font-extrabold text-gray-900 mb-6 border-b pb-2">行程數據視覺化分析</h2>
+                
+                <h3 class="text-xl font-semibold mb-4 text-blue-600">中歐城市間交通時間分配 (分鐘)</h3>
+                <div class="h-64 sm:h-96">
+                    <canvas id="trafficTimeChart"></canvas>
+                </div>
+
+                <div class="mt-8 pt-4 border-t">
+                    <h3 class="text-xl font-semibold mb-4 text-blue-600">數據解讀</h3>
+                    <p class="text-gray-600">此圖表展示了蜜月期間三個城市的主要交通工具（鐵路、纜車/船運）的預計總時長。薩爾斯堡因為包含哈爾施塔特 (Hallstatt) 的單日往返火車行程，故交通時間佔比最高，需預留足夠的轉乘緩衝時間。</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- JavaScript Logic (Native JS) -->
+    <script>
+        const SPA_DATA = {
+            summary: {
+                title: "中歐三城蜜月紀行 (維也納/薩爾斯堡/布達佩斯)",
+                duration: "16天15夜",
+                dates: "2026/03/24 - 2026/04/08",
+                cities: ["維也納 (Vienna)", "薩爾斯堡 (Salzburg)", "布達佩斯 (Budapest)"],
+                accommodation: {
+                    vienna1: "Yeshello (Day 2-4)",
+                    salzburg: "harry's XL hotel (Day 5-7)",
+                    vienna2: "Kranzgasse 23 (Day 8-10)",
+                    budapest: "Pozsonyi út 38 (Day 11-14)",
+                    vie_airport: "Hotel NH Vienna Airport (Day 15)"
+                }
+            },
+            traffic_plan: [
+                { city: "Vienna", pass: "維也納交通週票或72小時票", description: "針對您四天停留，推薦購買維也納交通週票 (如適用) 或兩張72小時票。它涵蓋地鐵(U-Bahn)、電車(Tram)和公車(Bus)。**OBB Simple Go** 適用於城際/機場快線，城市內通勤效率不高。", notice: "機場至市區可搭乘OBB RJ或S7，或CAT (較貴)。請記得在首次使用前打票 (Validate)。" },
+                { city: "Salzburg", pass: "薩爾斯堡卡 (Salzburg Card)", description: "強烈建議購買。此卡包含所有市內公共交通，以及所有主要景點（如要塞、纜車、海爾布倫宮）的門票。是高效率、高CP值的最佳選擇。", notice: "往返哈爾施塔特(Hallstatt) 的火車票 (OBB) 需單獨購買，薩爾斯堡卡不包含此段長途旅程。" },
+                { city: "Budapest", pass: "布達佩斯15天交通卡 (15-day Pass)", description: "完美的選擇。這張卡涵蓋布達佩斯所有交通工具，包含地鐵、電車、公車和船運 (部分線路)。您的停留時間適用此長效卡。", notice: "布達佩斯的M3地鐵常有路段維修，需注意替換公車路線。電車(Tram) 2號線是欣賞多瑙河景觀的最佳選擇。" }
+            ],
+            food_map: [
+                { id: 1, city: "Vienna", name: "Figlmüller at Wollzeile", type: "Signature Dining", specialty: "超大維也納炸肉排 (Wiener Schnitzel)", maps: "https://maps.google.com/?q=Figlmüller+at+Wollzeile", rating: 4.5 },
+                { id: 2, city: "Vienna", name: "Plachutta Wollzeile", type: "Signature Dining", specialty: "經典清燉牛肉 (Tafelspitz)", maps: "https://maps.google.com/?q=Plachutta+Wollzeile", rating: 4.3 },
+                { id: 3, city: "Vienna", name: "Bitzinger Würstelstand", type: "High CP/Street Food", specialty: "咖喱香腸 (Currywurst) 或 Käsekrainer", maps: "https://maps.google.com/?q=Bitzinger+Würstelstand+Albertina", rating: 4.6 },
+                { id: 4, city: "Salzburg", name: "Bärenwirt", type: "High CP/Local", specialty: "道地炸雞 (Backhendl)", maps: "https://maps.google.com/?q=Bärenwirt+Salzburg", rating: 4.4 },
+                { id: 5, city: "Salzburg", name: "Café Tomaselli", type: "Cafe", specialty: "奧地利最古老咖啡館，下午茶", maps: "https://maps.google.com/?q=Café+Tomaselli", rating: 4.2 },
+                { id: 6, city: "Budapest", name: "Menza Étterem és Kávézó", type: "High CP/Modern", specialty: "現代匈牙利菜，午餐套餐划算", maps: "https://maps.google.com/?q=Menza+Budapest", rating: 4.5 },
+                { id: 7, city: "Budapest", name: "Street Food Karavan", type: "High CP/Street Food", specialty: "多樣化國際與在地小吃集合", maps: "https://maps.google.com/?q=Street+Food+Karavan", rating: 4.3 },
+                { id: 8, city: "Budapest", name: "New York Café (紐約宮殿咖啡)", type: "Signature Dining", specialty: "世界最美咖啡館 (高價位)", maps: "https://maps.google.com/?q=New+York+Café", rating: 4.6 }
+            ],
+            traffic_comparison: {
+                labels: ["維也納市內通勤 (估計總時長)", "薩爾斯堡長途交通 (哈爾施塔特往返)", "布達佩斯市內通勤 (估計總時長)"],
+                data: [350, 480, 280] // Based on optimized itinerary time estimation (minutes)
+            },
+            itinerary: [
+                {
+                    day: 1, date: "2026/03/24", city: "移動日",
+                    description: "【專業修正】清理異常行程，專注國際飛行。",
+                    events: [
+                        { time: "13:30", activity: "桃園機場T2：國際航班報到 (TPE)", maps: "https://maps.google.com/?q=桃園國際機場第二航廈", type: "Logistics", duration: "2h00m" },
+                        { time: "15:30", activity: "TPE 出發 (轉機航班)", maps: "", type: "Flight", duration: "Transfer" },
+                        { time: "00:30", activity: "Zayed International Airport (AUH) 轉機", maps: "https://maps.google.com/?q=Zayed+International+Airport", type: "Flight", duration: "2h25m" },
+                        { time: "09:10", activity: "維也納國際機場 (VIE) 抵達", maps: "https://maps.google.com/?q=維也納國際機場", type: "Arrival", duration: "---" }
+                    ]
+                },
+                {
+                    day: 2, date: "2026/03/25", city: "維也納",
+                    description: "抵達、交通卡購買與美景宮藝術巡禮",
+                    events: [
+                        { time: "09:10", activity: "VIE機場：搭乘 S7/RJ 至 Vienna Central Station (Hbf)", maps: "https://maps.google.com/?q=Vienna+Central+Station", type: "Traffic", duration: "0h30m" },
+                        { time: "09:50", activity: "Vienna Hbf：購買城市交通票證 (72hr/週票) 及提款", maps: "https://maps.google.com/?q=Vienna+Central+Station", type: "Logistics", duration: "0h40m" },
+                        { time: "10:30", activity: "Check-in Yeshello (或寄放行李)", maps: "https://maps.google.com/?q=Yeshello+Vienna", type: "Accommodation", duration: "0h30m" },
+                        { time: "11:30", activity: "美景宮 Belvedere Palace：上美景宮 (克林姆特吻)", maps: "https://maps.google.com/?q=美景宮", type: "Attraction", duration: "4h00m" },
+                        { time: "15:30", activity: "午餐：Salm Bräu 釀造啤酒餐廳 (經典肋排)", maps: "https://maps.google.com/?q=Salm+Bräu+Vienna", type: "Food", duration: "1h15m" },
+                        { time: "17:00", activity: "卡爾教堂 Karlskirche", maps: "https://maps.google.com/?q=卡爾教堂", type: "Attraction", duration: "1h30m" },
+                        { time: "18:45", activity: "回程：至 Yeshello 附近超市採買 (PENNY/INTERSPAR)", maps: "https://maps.google.com/?q=PENNY+Vienna", type: "Logistics", duration: "1h00m" }
+                    ]
+                },
+                {
+                    day: 3, date: "2026/03/26", city: "維也納",
+                    description: "老城區經典咖啡文化與音樂巡禮",
+                    events: [
+                        { time: "08:30", activity: "早餐：薩赫咖啡館 (Sacher Café) - 體驗經典薩赫蛋糕", maps: "https://maps.google.com/?q=薩赫咖啡館", type: "Food", duration: "1h00m" },
+                        { time: "09:45", activity: "維也納國家歌劇院 (Vienna State Opera) 外觀/導覽", maps: "https://maps.google.com/?q=維也納國家歌劇院", type: "Attraction", duration: "0h45m" },
+                        { time: "10:45", activity: "維也納音樂協會大樓 (金色大廳)", maps: "https://maps.google.com/?q=維也納音樂協會大樓", type: "Attraction", duration: "0h45m" },
+                        { time: "11:45", activity: "聖彼得教堂 (Peterskirche)", maps: "https://maps.google.com/?q=維也納聖彼得教堂", type: "Attraction", duration: "1h00m" },
+                        { time: "13:00", activity: "午餐：Bitzinger Würstelstand (高CP值街頭香腸)", maps: "https://maps.google.com/?q=Bitzinger+Würstelstand+Albertina", type: "Food", duration: "0h45m" },
+                        { time: "14:00", activity: "聖斯德望主教座堂 (Stephansdom)", maps: "https://maps.google.com/?q=聖斯德望主教座堂", type: "Attraction", duration: "1h00m" },
+                        { time: "15:15", activity: "約翰史特勞斯公寓 (Wien Museum Johann Strauß Apartment)", maps: "https://maps.google.com/?q=Wien+Museum+Johann+Strauß+Apartment", type: "Attraction", duration: "1h00m" },
+                        { time: "16:30", activity: "城市公園 (Stadtpark) 與金色約翰史特勞斯像", maps: "https://maps.google.com/?q=城市公園", type: "Attraction", duration: "1h30m" },
+                        { time: "19:00", activity: "理蒙德劇院 (Raimund Theater) - 觀賞音樂劇", maps: "https://maps.google.com/?q=理蒙德劇院", type: "Culture", duration: "3h30m" }
+                    ]
+                },
+                {
+                    day: 4, date: "2026/03/27", city: "維也納",
+                    description: "霍夫堡宮殿群與市中心漫步",
+                    events: [
+                        { time: "09:00", activity: "奧地利國家圖書館 (Österreichische Nationalbibliothek)", maps: "https://maps.google.com/?q=奧地利國家圖書館", type: "Attraction", duration: "1h30m" },
+                        { time: "10:45", activity: "霍夫堡宮 (Hofburg) 及英雄廣場 (Heldenplatz)", maps: "https://maps.google.com/?q=霍夫堡", type: "Attraction", duration: "1h30m" },
+                        { time: "12:30", activity: "午餐：Café Central (中央咖啡館) - 享用經典午餐", maps: "https://maps.google.com/?q=Café+Central", type: "Food", duration: "1h15m" },
+                        { time: "14:00", activity: "Volksgarten 漫步至市政廳廣場 (Rathausplatz)", maps: "https://maps.google.com/?q=Volksgarten", type: "Attraction", duration: "1h30m" },
+                        { time: "15:45", activity: "貝多芬博物館 (Beethoven Museum)", maps: "https://maps.google.com/?q=貝多芬博物館", type: "Attraction", duration: "1h30m" },
+                        { time: "18:00", activity: "晚餐：回到住宿點附近享用晚餐或自理", maps: "", type: "Food", duration: "1h00m" }
+                    ]
+                },
+                {
+                    day: 5, date: "2026/03/28", city: "維也納 → 薩爾斯堡",
+                    description: "藝術史博物館深度遊覽與長途移動日",
+                    events: [
+                        { time: "09:00", activity: "藝術史博物館 (Kunsthistorisches Museum Wien) - 深度參觀", maps: "https://maps.google.com/?q=藝術史博物館", type: "Attraction", duration: "3h30m" },
+                        { time: "12:45", activity: "午餐：在博物館周邊快速用餐", maps: "", type: "Food", duration: "1h00m" },
+                        { time: "14:00", activity: "沃蒂夫教堂 (Votivkirche)", maps: "https://maps.google.com/?q=沃蒂夫教堂", type: "Attraction", duration: "1h00m" },
+                        { time: "15:30", activity: "舒伯特出生地博物館 (Wien Museum Schubert's Birthplace)", maps: "https://maps.google.com/?q=Wien+Museum+Schubert's+Birthplace", type: "Attraction", duration: "1h00m" },
+                        { time: "17:30", activity: "晚餐：Plachutta Wollzeile (特色清燉牛肉)", maps: "https://maps.google.com/?q=Plachutta+Wollzeile", type: "Food", duration: "1h15m" },
+                        { time: "19:00", activity: "Vienna Central Station：搭乘 OBB Railjet 往 Salzburg Hbf", maps: "https://maps.google.com/?q=Vienna+Central+Station", type: "Traffic", duration: "2h30m" },
+                        { time: "21:30", activity: "Salzburg Hbf 抵達並前往 harry's XL hotel Check-in", maps: "https://maps.google.com/?q=harry's+XL+hotel+Salzburg", type: "Accommodation", duration: "1h00m" }
+                    ]
+                },
+                {
+                    day: 6, date: "2026/03/29", city: "薩爾斯堡",
+                    description: "世界遺產湖區：哈爾施塔特一日遊 (須提早出門)",
+                    events: [
+                        { time: "08:30", activity: "Salzburg Hbf：搭乘 OBB REX/Railjet 往 Attnang-Puchheim", maps: "https://maps.google.com/?q=Salzburg+Hbf", type: "Traffic", duration: "1h30m" },
+                        { time: "10:00", activity: "Attnang-Puchheim 轉車往 Hallstatt 站", maps: "https://maps.google.com/?q=Attnang-Puchheim", type: "Traffic", duration: "1h40m" },
+                        { time: "12:00", activity: "Hallstatt 站：搭乘渡輪 (Ferry) 前往 Hallstatt 市區", maps: "https://maps.google.com/?q=Hallstatt", type: "Traffic/Attraction", duration: "0h15m" },
+                        { time: "12:30", activity: "哈爾施塔特湖區 (Hallstatt)：午餐與湖區深度觀光", maps: "https://maps.google.com/?q=Hallstatt+Marktplatz", type: "Attraction", duration: "5h00m" },
+                        { time: "17:30", activity: "搭乘渡輪返回 Hallstatt 火車站", maps: "", type: "Traffic", duration: "0h15m" },
+                        { time: "18:00", activity: "Hallstatt 站：搭乘 OBB 火車返回 Attnang-Puchheim 轉乘", maps: "", type: "Traffic", duration: "2h00m" },
+                        { time: "20:30", activity: "Salzburg Hbf 抵達，回飯店休息", maps: "https://maps.google.com/?q=Salzburg+Hbf", type: "Accommodation", duration: "0h30m" }
+                    ]
+                },
+                {
+                    day: 7, date: "2026/03/30", city: "薩爾斯堡",
+                    description: "自然景觀與水上噴泉的樂趣 (使用 Salzburg Card)",
+                    events: [
+                        { time: "09:00", activity: "溫特斯山纜車 (Untersbergbahn GmbH) - 山頂景觀", maps: "https://maps.google.com/?q=Untersbergbahn+GmbH", type: "Attraction", duration: "3h00m" },
+                        { time: "12:30", activity: "午餐：在山下或回市區途中用餐", maps: "", type: "Food", duration: "1h00m" },
+                        { time: "13:30", activity: "海爾布倫宮 (Schloss Hellbrunn) - 參觀惡作劇噴泉 (注意季節開放)", maps: "https://maps.google.com/?q=海爾布倫宮", type: "Attraction", duration: "2h30m" },
+                        { time: "16:30", activity: "大教堂廣場 (Domplatz) 與市中心漫步", maps: "https://maps.google.com/?q=大教堂廣場+Salzburg", type: "Attraction", duration: "1h00m" },
+                        { time: "18:00", activity: "晚餐：Bärenwirt (高CP值炸雞) 或市區其他餐廳", maps: "https://maps.google.com/?q=Bärenwirt+Salzburg", type: "Food", duration: "1h30m" }
+                    ]
+                },
+                {
+                    day: 8, date: "2026/03/31", city: "薩爾斯堡 → 維也納",
+                    description: "莫札特故鄉精華與回維也納",
+                    events: [
+                        { time: "09:00", activity: "米拉貝爾宮與花園 (Mirabellgarten)", maps: "https://maps.google.com/?q=米拉貝爾宮", type: "Attraction", duration: "1h00m" },
+                        { time: "10:15", activity: "馬卡特橋 (Makartsteg) - 愛情鎖橋", maps: "https://maps.google.com/?q=馬卡特橋", type: "Attraction", duration: "0h45m" },
+                        { time: "11:15", activity: "格特萊第街 (Getreidegasse) - 莫札特故居與特色招牌街", maps: "https://maps.google.com/?q=格特萊第街", type: "Attraction", duration: "1h00m" },
+                        { time: "12:30", activity: "午餐：市區咖啡館 Tomaselli 或在地午餐", maps: "", type: "Food", duration: "1h15m" },
+                        { time: "14:00", activity: "薩爾茨堡要塞 (Festung Hohensalzburg) - 搭乘纜車上山", maps: "https://maps.google.com/?q=薩爾茨堡要塞", type: "Attraction", duration: "2h00m" },
+                        { time: "16:15", activity: "搭乘僧侶山電梯 (Mönchsberg Lift) 欣賞城市景觀", maps: "https://maps.google.com/?q=僧侶山電梯", type: "Attraction", duration: "1h00m" },
+                        { time: "18:00", activity: "Salzburg Hbf：搭乘 OBB Railjet 返回 Vienna Central Station", maps: "https://maps.google.com/?q=Salzburg+Hbf", type: "Traffic", duration: "2h30m" },
+                        { time: "21:00", activity: "Vienna Hbf 抵達，前往 Kranzgasse 23 Check-in", maps: "https://maps.google.com/?q=Kranzgasse+23+Vienna", type: "Accommodation", duration: "1h00m" }
+                    ]
+                },
+                {
+                    day: 9, date: "2026/04/01", city: "維也納",
+                    description: "美泉宮與自然市集 (重新規劃)",
+                    events: [
+                        { time: "09:00", activity: "美泉宮 (Schloss Schönbrunn) - 宮殿內部導覽", maps: "https://maps.google.com/?q=美泉宮", type: "Attraction", duration: "3h00m" },
+                        { time: "12:15", activity: "美泉宮花園 (Schönbrunn Gardens) 與海神噴泉/凱旋門 (Gloriette) 登頂", maps: "https://maps.google.com/?q=Schönbrunn+Gardens", type: "Attraction", duration: "1h30m" },
+                        { time: "14:00", activity: "午餐：在美泉宮附近用餐", maps: "", type: "Food", duration: "1h00m" },
+                        { time: "15:15", activity: "約翰史特勞斯博物館 (Johann Strauss Museum - New Dimensions)", maps: "https://maps.google.com/?q=Johann+Strauss+Museum+-+New+Dimensions", type: "Attraction", duration: "1h30m" },
+                        { time: "17:00", activity: "納許市場 (Naschmarkt) - 漫步與街頭美食/晚餐探索", maps: "https://maps.google.com/?q=Naschmarkt", type: "Food/Attraction", duration: "2h00m" },
+                        { time: "19:30", activity: "返回 Kranzgasse 23", maps: "", type: "Accommodation", duration: "---" }
+                    ]
+                },
+                {
+                    day: 10, date: "2026/04/02", city: "維也納",
+                    description: "藝術與城市漫步",
+                    events: [
+                        { time: "09:00", activity: "早餐：Café Central (享用傳統維也納早餐)", maps: "https://maps.google.com/?q=Café+Central", type: "Food", duration: "1h00m" },
+                        { time: "10:15", activity: "阿爾貝蒂娜博物館 (Albertina Museum) - 欣賞繪畫與版畫", maps: "https://maps.google.com/?q=阿爾貝蒂娜博物館", type: "Attraction", duration: "2h30m" },
+                        { time: "13:00", activity: "午餐：Freyung 廣場周邊或 Am Hof 廣場附近 (非聖誕市集)", maps: "https://maps.google.com/?q=Freyung", type: "Food", duration: "1h00m" },
+                        { time: "14:15", activity: "耶穌會教堂 (Jesuitenkirche) - 欣賞巴洛克建築", maps: "https://maps.google.com/?q=耶穌會教堂", type: "Attraction", duration: "1h00m" },
+                        { time: "15:30", activity: "晚餐：Figlmüller at Wollzeile (超大炸肉排)", maps: "https://maps.google.com/?q=Figlmüller+at+Wollzeile", type: "Food", duration: "1h15m" },
+                        { time: "17:30", activity: "返回 Kranzgasse 23 休息", maps: "", type: "Accommodation", duration: "---" }
+                    ]
+                },
+                {
+                    day: 11, date: "2026/04/03", city: "維也納 → 布達佩斯",
+                    description: "告別維也納，火車前往布達佩斯",
+                    events: [
+                        { time: "09:00", activity: "早餐：Cafe Frauenhuber (維也納歷史最悠久的咖啡館之一)", maps: "https://maps.google.com/?q=Cafe+Frauenhuber", type: "Food", duration: "1h00m" },
+                        { time: "10:15", activity: "黑死病紀念柱 (Pestsäule) 與漫步格拉本大街", maps: "https://maps.google.com/?q=黑死病紀念柱", type: "Attraction", duration: "0h45m" },
+                        { time: "11:15", activity: "安可鐘 (Ankeruhr) - 觀看報時 (整點)", maps: "https://maps.google.com/?q=安可鐘", type: "Attraction", duration: "0h45m" },
+                        { time: "12:15", activity: "午餐：瓏驤維也納店 或 德梅爾咖啡店 (Demel) 午茶", maps: "https://maps.google.com/?q=瓏驤+維也納店", type: "Food", duration: "1h15m" },
+                        { time: "14:00", activity: "海頓故居博物館 (Wien Museum Haydnhaus)", maps: "https://maps.google.com/?q=Wien+Museum+Haydnhaus", type: "Attraction", duration: "1h00m" },
+                        { time: "17:30", activity: "Vienna Central Station：晚餐並準備搭乘 OBB Railjet 往 Budapest-Keleti", maps: "https://maps.google.com/?q=Vienna+Central+Station", type: "Logistics", duration: "1h00m" },
+                        { time: "18:30", activity: "搭乘 Railjet (RJ) 往 Budapest-Keleti (火車約 2h50m)", maps: "", type: "Traffic", duration: "2h50m" },
+                        { time: "21:20", activity: "Budapest-Keleti 抵達，轉車前往 Pozsonyi út 38 Check-in", maps: "https://maps.google.com/?q=Pozsonyi+út+38+Budapest", type: "Accommodation", duration: "1h00m" }
+                    ]
+                },
+                {
+                    day: 12, date: "2026/04/04", city: "布達佩斯",
+                    description: "佩斯區精華與美食探索",
+                    events: [
+                        { time: "09:00", activity: "匈牙利國家歌劇院 (Hungarian State Opera) - 外觀或導覽", maps: "https://maps.google.com/?q=匈牙利國家歌劇院", type: "Attraction", duration: "0h45m" },
+                        { time: "10:00", activity: "安德拉什大街 (Andrássy út) 漫步", maps: "https://maps.google.com/?q=Andrássy+út", type: "Attraction", duration: "1h00m" },
+                        { time: "11:15", activity: "匈牙利國家博物館 (Hungarian National Museum)", maps: "https://maps.google.com/?q=匈牙利國家博物館", type: "Attraction", duration: "2h30m" },
+                        { time: "14:00", activity: "午餐：布達佩斯中央市場 (Central Market Hall) - 探索在地小吃", maps: "https://maps.google.com/?q=布達佩斯中央市場", type: "Food", duration: "2h00m" },
+                        { time: "16:15", activity: "自由橋 (Liberty Bridge) 與蓋勒特山洞 (Gellért Hill Cave)", maps: "https://maps.google.com/?q=自由橋", type: "Attraction", duration: "1h30m" },
+                        { time: "18:30", activity: "晚餐：Comme Chez Soi (意式，需預訂) 或 Menza (高CP值匈牙利菜)", maps: "https://maps.google.com/?q=Comme+Chez+Soi", type: "Food", duration: "1h30m" },
+                        { time: "20:30", activity: "Purpleliner (觀光巴士或多瑙河夜景船運)", maps: "https://maps.google.com/?q=多瑙河夜景", type: "Culture", duration: "1h30m" }
+                    ]
+                },
+                {
+                    day: 13, date: "2026/04/05", city: "布達佩斯",
+                    description: "布達區：城堡山與溫泉體驗",
+                    events: [
+                        { time: "07:00", activity: "清晨：塞切尼鏈橋 (Széchenyi Chain Bridge) 晨景", maps: "https://maps.google.com/?q=塞切尼鏈橋", type: "Attraction", duration: "0h45m" },
+                        { time: "08:00", activity: "漁人堡 (Fisherman's Bastion) - 清晨光線最佳，避開人潮", maps: "https://maps.google.com/?q=漁人堡", type: "Attraction", duration: "1h30m" },
+                        { time: "09:45", activity: "馬加什教堂 (Matthias Church)", maps: "https://maps.google.com/?q=馬加什教堂", type: "Attraction", duration: "1h30m" },
+                        { time: "11:30", activity: "午茶：Ruszwurm Confectionery (布達佩斯最古老糕點店)", maps: "https://maps.google.com/?q=Ruszwurm+Confectionery", type: "Food", duration: "1h00m" },
+                        { time: "12:45", activity: "布達城堡 (Buda Castle) 與匈牙利國家美術館", maps: "https://maps.google.com/?q=布達城堡", type: "Attraction", duration: "3h00m" },
+                        { time: "16:30", activity: "盧達溫泉 (Rudas Baths) - 體驗土耳其浴 (注意男女開放時間)", maps: "https://maps.google.com/?q=盧達溫泉", type: "Relaxation", duration: "2h00m" },
+                        { time: "19:00", activity: "晚餐：回佩斯區 Pozsonyi út 38 附近享用", maps: "", type: "Food", duration: "1h00m" }
+                    ]
+                },
+                {
+                    day: 14, date: "2026/04/06", city: "布達佩斯",
+                    description: "國會大廈與猶太歷史探索",
+                    events: [
+                        { time: "09:00", activity: "匈牙利國會大廈 (Hungarian Parliament Building) - 外部與周邊", maps: "https://maps.google.com/?q=匈牙利國會大廈", type: "Attraction", duration: "0h45m" },
+                        { time: "10:00", activity: "多瑙河岸的鞋子 (Shoes on the Danube Bank) - 紀念碑", maps: "https://maps.google.com/?q=多瑙河岸的鞋子", type: "Attraction", duration: "0h30m" },
+                        { time: "10:45", activity: "自由廣場 (Szabadság tér)", maps: "https://maps.google.com/?q=自由廣場", type: "Attraction", duration: "1h00m" },
+                        { time: "12:00", activity: "午餐/點心：Gelarto Rosa (玫瑰花冰淇淋)", maps: "https://maps.google.com/?q=Gelarto+Rosa", type: "Food", duration: "0h45m" },
+                        { time: "13:00", activity: "聖伊什特萬聖殿 (St. Stephen's Basilica) - 登頂觀景", maps: "https://maps.google.com/?q=聖伊什特萬聖殿", type: "Attraction", duration: "1h30m" },
+                        { time: "14:45", activity: "晚餐：Costes Downtown (高檔美食，可改為高CP值 Menza)", maps: "https://maps.google.com/?q=Costes+Downtown", type: "Food", duration: "1h15m" },
+                        { time: "16:15", activity: "煙草街會堂 (Dohány Street Synagogue) - 歐洲最大猶太教堂", maps: "https://maps.google.com/?q=煙草街會堂", type: "Attraction", duration: "1h00m" },
+                        { time: "17:30", activity: "Művész Coffee House (Artist Cafe) - 傳統咖啡館體驗", maps: "https://maps.google.com/?q=Művész+Coffee+House", type: "Food", duration: "1h00m" }
+                    ]
+                },
+                {
+                    day: 15, date: "2026/04/07", city: "布達佩斯 → 維也納機場",
+                    description: "英雄廣場與返程準備",
+                    events: [
+                        { time: "09:00", activity: "早餐：Café Gerbeaud (歐洲著名咖啡館)", maps: "https://maps.google.com/?q=Café+Gerbeaud", type: "Food", duration: "1h00m" },
+                        { time: "10:15", activity: "李斯特紀念博物館 (Franz Liszt Memorial Museum)", maps: "https://maps.google.com/?q=李斯特紀念博物館", type: "Attraction", duration: "1h00m" },
+                        { time: "11:30", activity: "英雄廣場 (Hősök tere) 與城市公園", maps: "https://maps.google.com/?q=英雄廣場", type: "Attraction", duration: "1h00m" },
+                        { time: "12:45", activity: "午餐：在城市公園附近或沃伊達奇城堡周邊", maps: "", type: "Food", duration: "1h00m" },
+                        { time: "14:00", activity: "沃伊達奇城堡 (Vajdahunyad Castle) 與布達佩斯美術博物館 (Szépművészeti Múzeum)", maps: "https://maps.google.com/?q=沃伊達奇城堡", type: "Attraction", duration: "2h00m" },
+                        { time: "16:15", activity: "下午茶：New York Café (紐約宮殿咖啡) - 享受奢華氛圍", maps: "https://maps.google.com/?q=New+York+Café", type: "Food", duration: "1h00m" },
+                        { time: "17:30", activity: "Budapest-Keleti：搭乘火車往 VIE 機場站 (需在 Hbf 轉乘或直達)", maps: "https://maps.google.com/?q=Budapest-Keleti", type: "Traffic", duration: "3h30m" },
+                        { time: "21:30", activity: "Check-in Hotel NH Vienna Airport Conference Center", maps: "https://maps.google.com/?q=Hotel+NH+Vienna+Airport+Conference+Center", type: "Accommodation", duration: "1h00m" }
+                    ]
+                },
+                {
+                    day: 16, date: "2026/04/08", city: "返程",
+                    description: "維也納國際機場：登機返回",
+                    events: [
+                        { time: "08:00", activity: "在機場飯店享用早餐並 Check-out", maps: "", type: "Logistics", duration: "1h00m" },
+                        { time: "09:00", activity: "維也納國際機場 (VIE)：辦理登機手續", maps: "https://maps.google.com/?q=維也納國際機場", type: "Departure", duration: "2h40m" },
+                        { time: "11:40", activity: "VIE 出發", maps: "", type: "Departure", duration: "---" }
+                    ]
+                }
+            ]
+        };
+
+        // --- SPA Core Logic ---
+
+        const navTabs = document.getElementById('nav-tabs');
+        const pages = document.querySelectorAll('.spa-page');
+        let currentDay = 1;
+
+        function showPage(targetId) {
+            pages.forEach(page => {
+                page.classList.add('hidden');
+            });
+            document.getElementById(targetId).classList.remove('hidden');
+
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('text-blue-600', 'border-blue-600', 'font-semibold');
+                btn.classList.add('text-gray-500');
+                if (btn.getAttribute('data-target') === targetId) {
+                    btn.classList.add('text-blue-600', 'border-blue-600', 'font-semibold');
+                    btn.classList.remove('text-gray-500');
+                }
+            });
+
+            // Specific initialization for charts when their page is shown
+            if (targetId === 'data-viz') {
+                renderTrafficChart();
+            }
+        }
+
+        navTabs.addEventListener('click', (e) => {
+            if (e.target.classList.contains('tab-button')) {
+                showPage(e.target.getAttribute('data-target'));
+            }
+        });
+
+        // --- Data Rendering Functions ---
+
+        // 1. Overview
+        function renderOverview() {
+            const data = SPA_DATA.summary;
+            const content = document.getElementById('overview-content');
+            content.innerHTML = `
+                <div class="space-y-4">
+                    <p class="text-lg"><span class="font-bold text-blue-600">行程名稱：</span> ${data.title}</p>
+                    <p class="text-lg"><span class="font-bold text-blue-600">總時長：</span> ${data.duration}</p>
+                    <p class="text-lg"><span class="font-bold text-blue-600">日期區間：</span> ${data.dates}</p>
+                    <h3 class="text-xl font-semibold mt-4 mb-2 text-gray-700">城市與住宿分佈：</h3>
+                    <ul class="list-disc list-inside ml-4 text-gray-600">
+                        ${Object.keys(data.accommodation).map(key => `
+                            <li>${data.accommodation[key]}</li>
+                        `).join('')}
+                    </ul>
+                </div>
+            `;
+        }
+
+        // 2. Traffic Strategy
+        function renderTraffic() {
+            const content = document.getElementById('traffic-content');
+            content.innerHTML = SPA_DATA.traffic_plan.map(item => `
+                <div class="mb-8 p-4 border-l-4 border-blue-500 bg-blue-50 rounded-md">
+                    <h3 class="text-2xl font-bold text-blue-700 mb-2">${item.city}：${item.pass}</h3>
+                    <p class="text-gray-700 leading-relaxed">${item.description}</p>
+                    <p class="mt-2 text-red-600 font-medium">**注意事項 (Logistics Warning)：** ${item.notice}</p>
+                </div>
+            `).join('');
+        }
+
+        // 3. Daily Itinerary
+        function renderDaySelector() {
+            const container = document.getElementById('day-selector-container');
+            container.innerHTML = SPA_DATA.itinerary.map(day => `
+                <button data-day="${day.day}" class="day-button px-3 py-1 text-sm rounded-full transition duration-150 shadow-md 
+                    ${day.day === currentDay ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-blue-100'}">
+                    Day ${day.day} (${day.city})
+                </button>
+            `).join('');
+
+            document.querySelectorAll('.day-button').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const newDay = parseInt(e.target.getAttribute('data-day'));
+                    currentDay = newDay;
+                    renderDaySelector(); // Re-render to update active state
+                    renderDailyItinerary(newDay);
+                });
+            });
+        }
+
+        function renderDailyItinerary(dayNum) {
+            const dayData = SPA_DATA.itinerary.find(d => d.day === dayNum);
+            const detailContainer = document.getElementById('daily-itinerary-detail');
+
+            if (!dayData) {
+                detailContainer.innerHTML = `<p class="text-red-500">找不到 Day ${dayNum} 的行程數據。</p>`;
+                return;
+            }
+
+            detailContainer.innerHTML = `
+                <h3 class="text-2xl font-bold text-gray-800 mb-3">${dayData.city}：${dayData.date}</h3>
+                <p class="text-gray-600 italic mb-6">${dayData.description}</p>
+                <div class="space-y-6">
+                    ${dayData.events.map(event => `
+                        <div class="timeline-item">
+                            <div class="flex items-start">
+                                <span class="font-mono text-blue-600 text-lg sm:text-xl font-bold w-16 flex-shrink-0">${event.time}</span>
+                                <div class="ml-4">
+                                    <p class="text-lg font-semibold text-gray-900">${event.activity}</p>
+                                    <p class="text-sm text-gray-500 mb-1">
+                                        <span class="inline-block bg-gray-100 px-2 py-0.5 rounded mr-2">${event.type}</span>
+                                        ${event.duration !== "---" ? `預計停留/交通: ${event.duration}` : ''}
+                                    </p>
+                                    ${event.maps ? `<a href="${event.maps}" target="_blank" class="text-blue-500 hover:text-blue-700 text-sm underline">導航至 Google Maps</a>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // 4. Food Map
+        function renderFoodMap(cityFilter = 'all') {
+            const foodListContainer = document.getElementById('food-list');
+            const filteredData = cityFilter === 'all'
+                ? SPA_DATA.food_map
+                : SPA_DATA.food_map.filter(food => food.city === cityFilter);
+
+            foodListContainer.innerHTML = filteredData.map(food => `
+                <div class="p-4 border border-gray-200 rounded-lg bg-white hover:shadow-md transition duration-150">
+                    <h4 class="text-xl font-bold text-gray-900 mb-1">${food.name}</h4>
+                    <p class="text-blue-600 font-medium text-sm mb-2">${food.city} - ${food.type}</p>
+                    <p class="text-gray-700">${food.specialty}</p>
+                    <div class="mt-3 flex justify-between items-center">
+                        <span class="text-yellow-500 font-semibold">${food.rating} ★</span>
+                        <a href="${food.maps}" target="_blank" class="text-sm font-semibold text-blue-500 hover:text-blue-700 transition duration-150">
+                            查看地圖 &rarr;
+                        </a>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        document.getElementById('city-filter').addEventListener('change', (e) => {
+            renderFoodMap(e.target.value);
+        });
+
+        // 5. Chart.js Visualization
+        function renderTrafficChart() {
+            const ctx = document.getElementById('trafficTimeChart').getContext('2d');
+            
+            // Check if chart already exists to prevent duplicate rendering
+            if (window.trafficChart) {
+                window.trafficChart.destroy();
+            }
+
+            window.trafficChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: SPA_DATA.traffic_comparison.labels,
+                    datasets: [{
+                        label: '預計總交通時長 (分鐘)',
+                        data: SPA_DATA.traffic_comparison.data,
+                        backgroundColor: [
+                            'rgba(59, 130, 246, 0.8)', // Blue
+                            'rgba(234, 88, 12, 0.8)', // Orange (for the longest leg: Hallstatt)
+                            'rgba(16, 185, 129, 0.8)'  // Green
+                        ],
+                        borderColor: [
+                            'rgba(59, 130, 246, 1)',
+                            'rgba(234, 88, 12, 1)',
+                            'rgba(16, 185, 129, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: '時間 (分鐘)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true
+                        }
+                    }
+                }
+            });
+        }
+
+// --- Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            renderOverview();
+            renderTraffic();
+            renderDaySelector();
+            renderDailyItinerary(currentDay);
+            renderFoodMap('all');
+            
+            // Start by showing the overview page
+            showPage('overview'); 
+        });
+    </script>
+</body>
+</html>

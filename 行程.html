@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Our Europe Honeymoon 2026</title>
+    <title>Our Europe Honeymoon 2026 | Vienna • Salzburg • Budapest</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -12,286 +12,413 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
     
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        primary: '#E1306C', // Honeymoon Pink
-                        vienna: '#D4AF37', 
-                        salzburg: '#2D5A27',
-                        budapest: '#C8102E',
-                        bg: '#F9FAFB'
-                    }
+                        primary: '#E11D48', // Honeymoon Rose
+                        secondary: '#F1F5F9', // Light Slate for BG
+                        accent: '#BE185D',
+                        dark: '#1E293B',
+                        vienna: '#D4AF37', // Gold
+                        salzburg: '#2F5233', // Mountain Green
+                        budapest: '#CD212A', // Hungarian Red
+                    },
+                    fontFamily: { sans: ['Noto Sans TC', 'sans-serif'], }
                 }
             }
         }
     </script>
     <style>
-        body { font-family: 'Noto Sans TC', sans-serif; -webkit-tap-highlight-color: transparent; }
-        .active-tab { color: #E1306C; border-bottom: 2px solid #E1306C; font-weight: bold; }
-        .timeline-line { position: absolute; left: 20px; top: 0; bottom: 0; width: 2px; background: #E5E7EB; }
-        .timeline-dot { position: absolute; left: 14px; top: 20px; width: 14px; height: 14px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
-        .day-card { scroll-snap-align: start; flex-shrink: 0; width: 60px; }
+        body { -webkit-tap-highlight-color: transparent; }
+        .tab-active { color: #E11D48; border-bottom: 3px solid #E11D48; font-weight: bold; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .fade-in { animation: fadeIn 0.4s ease-out; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .timeline-line::before {
+            content: ''; position: absolute; left: 24px; top: 0; bottom: 0; width: 2px; background-color: #E2E8F0; z-index: 0;
+        }
+        
+        .day-btn-active { background-color: #E11D48 !important; color: white !important; border-color: #E11D48 !important; }
+        
+        .animate-fade { animation: fadeIn 0.4s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
-<body class="bg-gray-50">
+<body class="bg-gray-50 text-slate-800">
 
-    <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-200">
-        <div class="max-w-md mx-auto px-4 pt-5 pb-2">
-            <div class="flex justify-between items-center mb-4">
-                <h1 class="text-xl font-bold bg-gradient-to-r from-primary to-pink-400 bg-clip-text text-transparent">歐洲蜜月旅行 ✈️</h1>
-                <span class="text-xs bg-gray-100 px-2 py-1 rounded-full text-gray-500 font-medium">17 Days Journey</span>
+    <header class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm">
+        <div class="max-w-md mx-auto px-4 pt-4 pb-2">
+            <div class="flex justify-between items-center mb-3">
+                <h1 class="text-xl font-bold bg-gradient-to-r from-primary to-pink-500 bg-clip-text text-transparent">Our Europe Honeymoon 2026</h1>
+                <div class="text-2xl flex space-x-1"><span>🇦🇹</span><span>🇭🇺</span></div>
             </div>
             <nav class="flex space-x-6 text-sm overflow-x-auto hide-scrollbar whitespace-nowrap">
-                <button onclick="showSection('itinerary')" id="tab-itinerary" class="pb-2 active-tab">每日行程</button>
-                <button onclick="showSection('transport')" id="tab-transport" class="pb-2 text-gray-400">交通攻略</button>
-                <button onclick="showSection('stats')" id="tab-stats" class="pb-2 text-gray-400">數據分析</button>
+                <button onclick="switchTab('dashboard')" id="tab-dashboard" class="nav-btn pb-2 text-gray-500 hover:text-primary transition-colors">行程總覽</button>
+                <button onclick="switchTab('itinerary')" id="tab-itinerary" class="nav-btn pb-2 text-gray-500 hover:text-primary transition-colors">每日行程</button>
+                <button onclick="switchTab('food')" id="tab-food" class="nav-btn pb-2 text-gray-500 hover:text-primary transition-colors">美食地圖</button>
+                <button onclick="switchTab('prep')" id="tab-prep" class="nav-btn pb-2 text-gray-500 hover:text-primary transition-colors">行前準備</button>
             </nav>
         </div>
     </header>
 
-    <main class="max-w-md mx-auto min-h-screen pb-24">
-        
-        <section id="itinerary" class="p-4 fade-in">
-            <div class="flex overflow-x-auto space-x-3 mb-6 pb-2 hide-scrollbar scroll-smooth" id="day-nav">
-                </div>
+    <main class="max-w-md mx-auto min-h-screen p-4 pb-28">
 
-            <div id="timeline" class="relative">
-                </div>
-        </section>
-
-        <section id="transport" class="hidden p-4 fade-in">
-            <div class="space-y-4">
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-l-8 border-l-vienna">
-                    <h3 class="font-bold text-vienna mb-2">🇦🇹 維也納：ÖBB SimplyGo</h3>
-                    <p class="text-sm text-gray-600 leading-relaxed">開啟 ÖBB App 的 SimplyGo 功能。上車前滑動開始，下車滑動結束。系統會自動利用 GPS 幫你湊到當日最便宜票價！</p>
-                </div>
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-l-8 border-l-salzburg">
-                    <h3 class="font-bold text-salzburg mb-2">🇦🇹 薩爾斯堡：Salzburg Card</h3>
-                    <p class="text-sm text-gray-600 leading-relaxed">包含溫特山纜車、海爾布倫宮與市區交通。一張卡全部搞定，Day 9 務必使用這張卡，絕對回本！</p>
-                </div>
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-l-8 border-l-budapest">
-                    <h3 class="font-bold text-budapest mb-2">🇭🇺 布達佩斯：15-Day Pass</h3>
-                    <p class="text-sm text-gray-600 leading-relaxed">強烈建議買 15 天票 (Budapest-pass 15 days)，價格只比 72 小時票貴一點，但能讓你行程極度彈性，不用擔心查票。</p>
-                </div>
+        <section id="dashboard" class="section-content animate-fade space-y-5">
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 text-center">
+                <p class="text-xs text-gray-500 uppercase tracking-widest">浪漫歐陸之旅</p>
+                <p class="text-4xl font-bold text-gray-900 my-1">17 Days</p>
+                <p class="text-xs text-gray-400">2026/03/23 - 04/08</p>
             </div>
-        </section>
-
-        <section id="stats" class="hidden p-4 fade-in">
-            <div class="bg-white p-6 rounded-3xl shadow-sm mb-6">
-                <h3 class="font-bold text-gray-800 mb-4 text-center">行程分佈 (天數)</h3>
-                <div class="h-64"><canvas id="cityChart"></canvas></div>
+            
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+                <h3 class="font-bold mb-4 text-center text-gray-700">城市停留天數</h3>
+                <div class="h-64"><canvas id="tripChart"></canvas></div>
             </div>
-            <div class="grid grid-cols-2 gap-4 text-center">
-                <div class="bg-primary/5 p-4 rounded-2xl">
-                    <div class="text-2xl mb-1">🏰</div>
-                    <div class="text-xs text-gray-500">城堡宮殿</div>
-                    <div class="font-bold text-primary">8 處</div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-white p-5 rounded-3xl shadow-sm border border-gray-100 space-y-1">
+                    <span class="text-2xl">🏛️</span>
+                    <div class="text-xs text-gray-500">城堡與宮殿</div>
+                    <div class="font-bold text-lg text-primary">7處</div>
                 </div>
-                <div class="bg-vienna/5 p-4 rounded-2xl">
-                    <div class="text-2xl mb-1">☕</div>
+                <div class="bg-white p-5 rounded-3xl shadow-sm border border-gray-100 space-y-1">
+                    <span class="text-2xl">☕</span>
                     <div class="text-xs text-gray-500">經典咖啡館</div>
-                    <div class="font-bold text-vienna">7 間</div>
+                    <div class="font-bold text-lg text-primary">8間</div>
                 </div>
+            </div>
+        </section>
+
+        <section id="itinerary" class="section-content hidden animate-fade">
+            <div class="flex overflow-x-auto gap-2 mb-6 pb-2 hide-scrollbar scroll-smooth" id="day-selector">
+                </div>
+            <div id="timeline" class="relative pl-12 space-y-0">
+                </div>
+        </section>
+
+        <section id="food" class="section-content hidden animate-fade space-y-4">
+            <div class="flex gap-2 overflow-x-auto hide-scrollbar pb-2">
+                <button onclick="filterFood('all')" class="food-filter-btn active-food-filter text-white bg-primary px-4 py-1.5 rounded-full text-xs shadow-sm">全部</button>
+                <button onclick="filterFood('維也納')" class="food-filter-btn bg-white border border-slate-200 text-slate-600 px-4 py-1.5 rounded-full text-xs">維也納</button>
+                <button onclick="filterFood('薩爾斯堡')" class="food-filter-btn bg-white border border-slate-200 text-slate-600 px-4 py-1.5 rounded-full text-xs">薩爾斯堡</button>
+                <button onclick="filterFood('布達佩斯')" class="food-filter-btn bg-white border border-slate-200 text-slate-600 px-4 py-1.5 rounded-full text-xs">布達佩斯</button>
+                <button onclick="filterFood('HighCP')" class="food-filter-btn bg-amber-100 border border-amber-300 text-amber-800 px-4 py-1.5 rounded-full text-xs font-bold">🔥 高CP值</button>
+            </div>
+            <div id="foodList" class="space-y-3">
+                </div>
+        </section>
+
+        <section id="prep" class="section-content hidden animate-fade space-y-5">
+            <div class="bg-blue-50 p-6 rounded-3xl border border-blue-100">
+                <h3 class="font-bold text-blue-900 mb-3 flex items-center">🚆 交通必讀細節 (專家提示)</h3>
+                <ul class="text-sm text-blue-950 space-y-3 list-decimal list-inside leading-relaxed">
+                    <li><b>維也納：SimplyGo。</b>下載 ÖBB App 並開啟 "SimplyGo"。進站務必滑動開始，下車滑動結束。系統會利用 GPS 自動計算最便宜票價。實體票進地鐵前務必「打票」。</li>
+                    <li><b>薩爾斯堡：Salzburg Card。</b>這張卡包含：溫特山纜車(€28)、海爾布倫宮(€13.5)、要塞纜車、莫札特故居及市區公車。Day 9 安排纜車與噴泉，使用此卡絕對回本！建議購買 24h/48h Pass。</li>
+                    <li><b>布達佩斯：15-day Pass。</b>價格 (約 6300 HUF) 與 72小時券差不多，CP 值極高，行程更彈性。進站需出示 BKK App 的 QR Code 或紙本票。查票嚴格。</li>
+                </ul>
+            </div>
+            <div class="bg-primary/5 p-6 rounded-3xl border border-primary/10">
+                <h3 class="font-bold text-primary mb-3">📋 蜜月行前清單</h3>
+                <p class="text-sm text-slate-700leading-relaxed">
+                    確保福倫藥局採買的常備藥、成人尿布（以備長途飛行不時之需）已裝箱。申根保險證明文件已準備。網路漫遊或 SIM 卡已搞定。下載 ÖBB、BKK (BudapestGO) App。
+                </p>
             </div>
         </section>
 
     </main>
 
     <div class="fixed bottom-6 left-1/2 -translate-x-1/2 w-full max-w-xs z-50">
-        <div class="bg-gray-900/90 text-white backdrop-blur-md rounded-full py-3 px-6 shadow-2xl flex justify-around items-center border border-white/20">
+        <div class="bg-gray-950 text-white backdrop-blur-md rounded-full py-4 px-8 shadow-2xl flex justify-around items-center border border-white/10">
             <button onclick="window.open('https://www.google.com/maps')" class="flex flex-col items-center">
                 <span class="text-xl">🗺️</span>
                 <span class="text-[10px] mt-1 opacity-70">開啟地圖</span>
             </button>
-            <div class="h-6 w-[1px] bg-white/20"></div>
-            <button onclick="location.reload()" class="flex flex-col items-center">
-                <span class="text-xl">🔄</span>
-                <span class="text-[10px] mt-1 opacity-70">重新整理</span>
+            <div class="h-6 w-[1px] bg-white/10"></div>
+            <button onclick="switchTab('itinerary')" class="flex flex-col items-center">
+                <span class="text-xl">Day</span>
+                <span id="currentDayBtn" class="text-[10px] mt-1 opacity-70">今天</span>
             </button>
         </div>
     </div>
 
     <script>
-        // --- 行程數據 ---
-        const tripData = [
-            { day: 1, date: "03/23", location: "Taiwan 🛫 Departure", events: [
-                { time: "08:00", name: "福倫藥局 (準備尿布/備藥)", type: "misc", desc: "確保行前物資完備" },
-                { time: "16:25", name: "轉機/出發", type: "transport", desc: "漫長飛行開始" }
-            ]},
-            { day: 2, date: "03/24", location: "Vienna Arrival", events: [
-                { time: "06:20", name: "維也納國際機場 🇦🇹", type: "transport" },
-                { time: "10:37", name: "霍夫堡 & 英雄廣場", type: "sight" },
-                { time: "17:56", name: "德梅爾咖啡店 (Demel)", type: "food", desc: "必吃皇室甜點" }
-            ]},
-            { day: 3, date: "03/25", location: "Vienna Art Day", events: [
-                { time: "10:15", name: "美景宮美術館", type: "sight", desc: "看《吻》Klimt The Kiss" },
-                { time: "14:56", name: "Huber's", type: "food" },
-                { time: "16:07", name: "卡爾教堂", type: "sight" }
-            ]},
-            { day: 4, date: "03/26", location: "Vienna Opera", events: [
-                { time: "08:20", name: "薩赫咖啡館 (Sacher)", type: "food" },
-                { time: "13:26", name: "聖斯德望主教座堂", type: "sight" },
-                { time: "19:00", name: "理蒙德劇院", type: "sight" }
-            ]},
-            { day: 5, date: "03/27", location: "Vienna Music", events: [
-                { time: "08:59", name: "奧地利國家圖書館", type: "sight" },
-                { time: "13:29", name: "Fenster Café", type: "food", desc: "甜筒咖啡推薦" },
-                { time: "14:06", name: "音樂博物館", type: "sight" }
-            ]},
-            { day: 6, date: "03/28", location: "Vienna 🚆 Salzburg", events: [
-                { time: "10:03", name: "藝術史博物館", type: "sight" },
-                { time: "16:10", name: "Plachutta (清燉牛肉)", type: "food" },
-                { time: "21:53", name: "抵達 Salzburg 🏰", type: "transport" }
-            ]},
-            { day: 7, date: "03/29", location: "Hallstatt Trip", events: [
-                { time: "09:47", name: "Hallstatt 哈修塔特", type: "sight", desc: "世界最美小鎮" },
-                { time: "12:58", name: "明信片拍照角", type: "photo" },
-                { time: "15:57", name: "鹽礦 (Salzwelten)", type: "sight" }
-            ]},
-            { day: 8, date: "03/30", location: "Salzburg City", events: [
-                { time: "08:41", name: "米拉貝爾宮", type: "sight" },
-                { time: "11:52", name: "Balkan Grill Walter", type: "food", desc: "高CP熱狗堡" },
-                { time: "15:32", name: "薩爾茨堡要塞", type: "sight" }
-            ]},
-            { day: 9, date: "03/31", location: "Salzburg 🚆 Vienna", events: [
-                { time: "09:04", name: "溫特山纜車", type: "sight", desc: "薩爾斯堡卡必去" },
-                { time: "12:35", name: "海爾布倫宮", type: "sight" },
-                { time: "22:01", name: "回到維也納住宿", type: "stay" }
-            ]},
-            { day: 10, date: "04/01", location: "Vienna Schönbrunn", events: [
-                { time: "08:59", name: "美泉宮", type: "sight" },
-                { time: "18:03", name: "Naschmarkt (納許市場)", type: "food" }
-            ]},
-            { day: 11, date: "04/02", location: "Vienna Final", events: [
-                { time: "10:00", name: "阿爾貝蒂娜博物館", type: "sight" },
-                { time: "15:29", name: "Vienna Sausage", type: "food" },
-                { time: "17:50", name: "Figlmüller (炸豬排)", type: "food" }
-            ]},
-            { day: 12, date: "04/03", location: "Vienna 🚆 Budapest", events: [
-                { time: "10:08", name: "Cafe Frauenhuber", type: "food" },
-                { time: "12:29", name: "Longchamp 購物", type: "misc" },
-                { time: "21:21", name: "抵達布達佩斯 🇭🇺", type: "transport" }
-            ]},
-            { day: 13, date: "04/04", location: "Budapest Pest Side", events: [
-                { time: "10:27", name: "國家歌劇院", type: "sight" },
-                { time: "13:58", name: "中央市場", type: "sight" },
-                { time: "18:30", name: "多瑙河遊船 (Purpleliner)", type: "sight" }
-            ]},
-            { day: 14, date: "04/05", location: "Budapest Buda Side", events: [
-                { time: "07:05", name: "漁人堡 & 馬加什教堂", type: "sight" },
-                { time: "11:09", name: "Ruszwurm (老店甜點)", type: "food" },
-                { time: "15:00", name: "聖盧卡奇溫泉", type: "sight" }
-            ]},
-            { day: 15, date: "04/06", location: "Budapest Landmarks", events: [
-                { time: "09:19", name: "國會大廈 (地標)", type: "sight" },
-                { time: "12:12", name: "聖伊什特萬聖殿", type: "sight" },
-                { time: "14:23", name: "Gerbeaud 咖啡館", type: "food" }
-            ]},
-            { day: 16, date: "04/07", location: "Budapest 🚆 Airport", events: [
-                { time: "08:53", name: "紐約宮殿咖啡館", type: "food", desc: "最美咖啡館" },
-                { time: "10:42", name: "美術博物館", type: "sight" },
-                { time: "21:00", name: "機場飯店過夜", type: "stay" }
-            ]},
-            { day: 17, date: "04/08", location: "Home Sweet Home", events: [
-                { time: "09:00", name: "維也納國際機場", type: "transport" }
-            ]}
-        ];
+        // --- 核心資料庫 (完整 17 天) ---
+        const trip = {
+            days: [
+                { id: 1, date: "03/23", location: "Taiwan 🛫 Departure", events: [
+                    { time: "08:00", spot: "福倫藥局竹山店", type: "misc", dur: "1h", desc: "定期處方箋/成人尿布" },
+                    { time: "11:13", spot: "星威停車場", type: "misc", dur: "30m" },
+                    { time: "11:50", spot: "東方宇逸貴賓室", type: "misc", dur: "1h" },
+                    { time: "13:15", spot: "桃園國際機場 T2", type: "transport", dur: "Departure" },
+                    { time: "16:25", spot: "3號航廈站 (轉機)", type: "transport", dur: "10h 45m" }
+                ]},
+                { id: 2, date: "03/24", location: "Vienna Arrival", events: [
+                    { time: "06:20", spot: "維也納國際機場", type: "transport", dur: "1h 20m" },
+                    { time: "07:57", spot: "Vienna Central Station", type: "transport", dur: "30m" },
+                    { time: "09:40", spot: "Kolbeck Rooms", type: "stay", dur: "35m", desc: "Check-in/放行李" },
+                    { time: "10:37", spot: "霍夫堡", type: "sight", dur: "35m", desc: "皇宮區域" },
+                    { time: "11:15", spot: "英雄廣場", type: "sight", dur: "35m" },
+                    { time: "12:30", spot: "奧地利國會大廈", type: "sight", dur: "1h 10m" },
+                    { time: "13:45", spot: "市政廳廣場", type: "sight", dur: "30m" },
+                    { time: "14:24", spot: "沃蒂夫教堂", type: "sight", dur: "1h" },
+                    { time: "17:56", spot: "德梅爾咖啡店 (Demel)", type: "food", dur: "1h", desc: "皇家咖啡甜點 (必吃)" },
+                    { time: "19:16", spot: "Kolbeck Rooms", type: "stay", dur: "Sleep" }
+                ]},
+                { id: 3, date: "03/25", location: "Vienna Belvedere", events: [
+                    { time: "09:00", spot: "電梯咖啡廳", type: "food", dur: "1h" },
+                    { time: "10:15", spot: "奧地利美景宮美術館", type: "sight", dur: "3h 30m", desc: "看 Klimt 'The Kiss'" },
+                    { time: "13:45", spot: "美景宮", type: "sight", dur: "1h", desc: "宮殿花園" },
+                    { time: "14:56", spot: "Huber's", type: "food", dur: "1h" },
+                    { time: "16:07", spot: "卡爾教堂", type: "sight", dur: "1h 35m", desc: "巴洛克地標" },
+                    { time: "18:28", spot: "Yeshello", type: "stay", dur: "Stay" },
+                    { time: "18:41", spot: "PENNY 超市", type: "misc", dur: "1h", desc: "採買" }
+                ]},
+                { id: 4, date: "03/26", location: "Vienna Classics", events: [
+                    { time: "08:20", spot: "薩赫咖啡館 (Sacher)", type: "food", dur: "1h 20m", desc: "薩赫蛋糕 Sacher Torte" },
+                    { time: "09:42", spot: "維也納國家歌劇院", type: "sight", dur: "45m" },
+                    { time: "11:15", spot: "安娜教堂", type: "sight", dur: "30m" },
+                    { time: "11:56", spot: "維也納聖彼得教堂", type: "sight", dur: "1h 25m" },
+                    { time: "13:26", spot: "聖斯德望主教座堂", type: "sight", dur: "1h", desc: "市中心地標" },
+                    { time: "14:37", spot: "城市公園", desc: "金像", type: "sight", dur: "1h 50m" },
+                    { time: "19:00", spot: "理蒙德劇院 (Raimund Theater)", type: "sight", dur: "3h 30m", desc: "看劇" }
+                ]},
+                { id: 5, date: "03/27", location: "Vienna Music & Library", events: [
+                    { time: "08:59", spot: "奧地利國家圖書館", type: "sight", dur: "1h 20m", desc: "最美圖書館之一" },
+                    { time: "11:48", spot: "維也納莫扎特之家", type: "sight", dur: "1h" },
+                    { time: "12:52", spot: "Öfferl - Wollzeile 31", type: "food", dur: "30m" },
+                    { time: "13:29", spot: "Fenster Café", type: "food", dur: "20m", desc: "甜筒咖啡推薦" },
+                    { time: "14:06", spot: "音樂博物館 (Haus der Musik)", type: "sight", dur: "4h", desc: "互動式體驗" }
+                ]},
+                { id: 6, date: "03/28", location: "Vienna -> Salzburg", events: [
+                    { time: "10:03", spot: "藝術史博物館", type: "sight", dur: "4h" },
+                    { time: "14:12", spot: "人民公園 (Volksgarten)", type: "sight", dur: "1h 45m" },
+                    { time: "16:10", spot: "Plachutta (清燉牛肉)", type: "food", dur: "1h", desc: "Tafelspitz 奧地利國菜" },
+                    { time: "21:53", spot: "Salzburg Hbf", type: "transport", dur: "Train Arrival" },
+                    { time: "23:00", spot: "harry's XL hotel", type: "stay", dur: "Stay" }
+                ]},
+                { id: 7, date: "03/29", location: "Hallstatt Day Trip", events: [
+                    { time: "09:47", spot: "Hallstatt 哈修塔特", type: "sight", dur: "5m", desc: "抵達" },
+                    { time: "10:11", spot: "Seecafé Hallstatt", type: "food", dur: "1h" },
+                    { time: "12:58", spot: "明信片拍照角度", type: "sight", dur: "45m", desc: "網美必拍" },
+                    { time: "13:46", spot: "聖母升天教區教堂", type: "sight", dur: "1h", desc: "人骨教堂" },
+                    { time: "15:57", spot: "鹽礦 (Salzwelten) Shop", type: "sight", dur: "1h" },
+                    { time: "19:27", spot: "Salzburg Hbf", type: "transport", dur: "Return" }
+                ]},
+                { id: 8, date: "03/30", location: "Salzburg City", events: [
+                    { time: "08:41", spot: "米拉貝爾宮", type: "sight", dur: "1h", desc: "真善美場景" },
+                    { time: "10:51", spot: "格特萊第街 (Getreidegasse)", type: "sight", dur: "1h" },
+                    { time: "11:52", spot: "Balkan Grill Walter", type: "food", dur: "20m", desc: "Bosna Grill 熱狗堡 (高CP)" },
+                    { time: "12:15", spot: "莫扎特出生地", type: "sight", dur: "30m" },
+                    { time: "12:50", spot: "薩爾斯堡主教座堂", type: "sight", dur: "1h 30m" },
+                    { time: "15:32", spot: "薩爾茨堡要塞", type: "sight", dur: "2h" },
+                    { time: "18:53", spot: "Taste of India", type: "food", dur: "1h" }
+                ]},
+                { id: 9, date: "03/31", location: "Salzburg -> Vienna", events: [
+                    { time: "09:04", spot: "溫特山纜車", type: "sight", dur: "3h", desc: "使用薩爾斯堡卡 (卡免費)" },
+                    { time: "12:35", spot: "海爾布倫宮", type: "sight", dur: "2h 30m", desc: "惡作劇噴泉 (卡免費)" },
+                    { time: "18:07", spot: "Salzburg Hbf", type: "transport", dur: "Return to Vienna" },
+                    { time: "22:01", spot: "Kranzgasse 23", type: "stay", dur: "Stay" }
+                ]},
+                { id: 10, date: "04/01", location: "Vienna Schönbrunn", events: [
+                    { time: "08:59", spot: "美泉宮 (Schönbrunn)", type: "sight", dur: "4h", desc: "Sisi 公主夏宮" },
+                    { time: "13:00", spot: "美泉宮市集", type: "misc", dur: "1h" },
+                    { time: "16:51", spot: "水族館 (Haus des Meeres)", type: "sight", dur: "1h", desc: "高塔水族館" },
+                    { time: "18:03", spot: "Naschmarkt (納許市場)", type: "food", dur: "1h 30m" }
+                ]},
+                { id: 11, date: "04/02", location: "Vienna Albertina", events: [
+                    { time: "10:00", spot: "阿爾貝蒂娜博物館", type: "sight", dur: "2h 30m" },
+                    { time: "13:19", spot: "Weihnachtsmarkt am Hof", type: "misc", dur: "1h" },
+                    { time: "15:29", spot: "Vienna Sausage", type: "food", dur: "1h" },
+                    { time: "17:50", spot: "Figlmüller", type: "food", dur: "1h", desc: "炸豬排老店 (預約)" }
+                ]},
+                { id: 12, date: "04/03", location: "Vienna -> Budapest", events: [
+                    { time: "10:08", spot: "Cafe Frauenhuber", type: "food", dur: "1h", desc: "維也納最古老咖啡館" },
+                    { time: "黑死病紀念柱", spot: "黑死病紀念柱柱", type: "sight", dur: "25m" },
+                    { time: "11:57", spot: "安可鐘 (Ankeruhr)", type: "sight", dur: "25m" },
+                    { time: "12:29", spot: "瓏驤 維也納店", type: "misc", dur: "1h 20m" },
+                    { time: "21:21", spot: "Budapest-Keleti", type: "transport", dur: "Arrival" },
+                    { time: "21:59", spot: "Pozsonyi út 38", type: "stay", dur: "Stay" }
+                ]},
+                { id: 13, date: "04/04", location: "Budapest Pest Side", events: [
+                    { time: "10:27", spot: "匈牙利國家歌劇院", type: "sight", dur: "30m" },
+                    { time: "11:00", spot: "Művész Coffee House", type: "food", dur: "1h", desc: "藝術家咖啡館" },
+                    { time: "13:58", spot: "中央市場", type: "sight", dur: "2h", desc: "採買辣椒粉/鵝肝醬" },
+                    { time: "16:04", spot: "自由橋", type: "sight", dur: "1h" },
+                    { time: "18:30", spot: "多瑙河遊船 (Purpleliner)", type: "sight", dur: "2h", desc: "夜景遊船" }
+                ]},
+                { id: 14, date: "04/05", location: "Budapest Buda Side", events: [
+                    { time: "07:05", spot: "漁人堡", type: "sight", dur: "2h", desc: "最美多瑙河景" },
+                    { time: "09:07", spot: "馬加什教堂", type: "sight", dur: "2h" },
+                    { time: "11:09", spot: "Ruszwurm Confectionery", type: "food", dur: "1h", desc: "城堡區老店" },
+                    { time: "12:17", spot: "布達城堡", type: "sight", dur: "1h 20m" },
+                    { time: "15:00", spot: "聖盧卡奇溫泉 (Lukács)", type: "sight", dur: "1h" }
+                ]},
+                { id: 15, date: "04/06", location: "Budapest Landmarks", events: [
+                    { time: "09:19", spot: "匈牙利國會大廈", type: "sight", dur: "20m", desc: "地標" },
+                    { time: "09:48", spot: "多瑙河岸的鞋子", type: "sight", dur: "25m" },
+                    { time: "11:35", spot: "Gelarto Rosa", type: "food", dur: "35m", desc: "玫瑰花冰淇淋" },
+                    { time: "12:12", spot: "聖伊什特萬聖殿", type: "sight", dur: "2h" },
+                    { time: "14:23", spot: "Café Gerbeaud", type: "food", dur: "1h" },
+                    { time: "16:37", spot: "煙草街會堂", type: "sight", dur: "1h" }
+                ]},
+                { id: 16, date: "04/07", location: "Budapest Final", events: [
+                    { time: "08:53", spot: "紐約宮殿咖啡", type: "food", dur: "1h 30m", desc: "世界最美咖啡館 (必去)" },
+                    { time: "10:42", spot: "布達佩斯美術博物館", type: "sight", dur: "4h" },
+                    { time: "14:44", spot: "英雄廣場", type: "sight", dur: "30m" },
+                    { time: "15:21", spot: "匈牙利音樂之家", type: "sight", dur: "45m" },
+                    { time: "16:11", spot: "沃伊達奇城堡", type: "sight", dur: "1h" },
+                    { time: "21:00", spot: "Hotel NH Vienna Airport", type: "stay", dur: "Sleep" }
+                ]},
+                { id: 17, date: "04/08", location: "Home Sweet Home", events: [
+                    { time: "09:00", spot: "維也納國際機場", type: "transport", dur: "End" }
+                ]}
+            ],
+            foods: [
+                { city: "維也納", name: "德梅爾咖啡店 (Demel)", note: "皇家咖啡甜點", type: "Cafe", cp: false },
+                { city: "維也納", name: "薩赫咖啡館 (Sacher)", note: "Sacher Torte", type: "Cafe", cp: false },
+                { city: "維也納", name: "Plachutta Wollzeile", note: "清燉牛肉 (Tafelspitz)", type: "Austrian", cp: false },
+                { city: "維也納", name: "Café Central", note: "百年咖啡館", type: "Cafe", cp: false },
+                { city: "維也納", name: "Figlmüller Wollzeile", note: "臉大炸豬排 (預約)", type: "Austrian", cp: false },
+                { city: "維也納", name: "Fenster Café", note: "甜筒咖啡推薦", type: "Cafe", cp: true },
+                { city: "維也納", name: "Huber's", note: "當地料理", type: "Austrian", cp: false },
+                { city: "薩爾斯堡", name: "Balkan Grill Walter", note: "Bosna Grill (熱狗堡)", type: "HighCP", cp: true },
+                { city: "薩爾斯堡", name: "Taste of India", note: "印度料理", type: "Mixed", cp: false },
+                { city: "哈修塔特", name: "Seecafé Hallstatt", note: "湖邊咖啡", type: "Cafe", cp: false },
+                { city: "哈修塔特", name: "Rührwerk", note: "Schaumrollen (泡芙捲)", type: "Street Food", cp: true },
+                { city: "布達佩斯", name: "Comme Chez Soi", note: "義法匈結合料理", type: "Mixed", cp: false },
+                { city: "布達佩斯", name: "Ruszwurm Confectionery", note: "老牌甜點店", type: "Cafe", cp: true },
+                { city: "布達佩斯", name: "Gelarto Rosa", note: "玫瑰花冰淇淋", type: "Cafe", cp: false },
+                { city: "布達佩斯", name: "紐約宮殿咖啡", note: "世界最美咖啡館", type: "Cafe", cp: false },
+                { city: "布達佩斯", name: "Művész Coffee House", note: "藝術家咖啡館", type: "Cafe", cp: false },
+                { city: "布達佩斯", name: "Menza", note: "復古食堂鴨腿飯", type: "HighCP", cp: true }
+            ]
+        };
 
-        // --- 核心邏輯 ---
+        // --- 介面控制核心 (SPA) ---
+        function switchTab(tabId) {
+            // Hide all sections
+            document.querySelectorAll('.section-content').forEach(s => s.classList.add('hidden'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('tab-active'));
+            // Show target section & highlight tab
+            document.getElementById(tabId).classList.remove('hidden');
+            document.getElementById('tab-' + tabId).classList.add('tab-active');
 
-        function showSection(sectionId) {
-            ['itinerary', 'transport', 'stats'].forEach(s => {
-                document.getElementById(s).classList.add('hidden');
-                document.getElementById('tab-' + s).classList.remove('active-tab');
-                document.getElementById('tab-' + s).classList.add('text-gray-400');
-            });
-            document.getElementById(sectionId).classList.remove('hidden');
-            document.getElementById('tab-' + sectionId).classList.add('active-tab');
-            document.getElementById('tab-' + sectionId).classList.remove('text-gray-400');
-            
-            if(sectionId === 'stats') initChart();
+            if(tabId === 'stats') initTripChart();
         }
 
-        function renderDay(idx) {
-            const data = tripData[idx];
-            const timeline = document.getElementById('timeline');
-            
-            // Highlight active nav
-            document.querySelectorAll('.day-btn').forEach((btn, i) => {
-                if(i === idx) btn.classList.add('border-primary', 'text-primary', 'bg-pink-50');
-                else btn.classList.remove('border-primary', 'text-primary', 'bg-pink-50');
+        function renderDaySelector() {
+            const selector = document.getElementById('day-selector');
+            selector.innerHTML = trip.days.map((d, i) => `
+                <button onclick="renderTimeline(${i})" 
+                        class="day-btn flex-shrink-0 bg-white border border-gray-100 text-slate-500 rounded-2xl p-4 text-center transition-all w-20 shadow-sm"
+                        id="day-btn-${i}">
+                    <div class="text-[10px] font-bold uppercase tracking-wider opacity-60">Day</div>
+                    <div class="text-3xl font-extrabold my-1">${d.id}</div>
+                    <div class="text-[10px] font-medium opacity-80">${d.date.slice(5)}</div>
+                </button>
+            `).join('');
+        }
+
+        function renderTimeline(dayIndex) {
+            // Highlight active button
+            document.querySelectorAll('.day-btn').forEach((b, i) => {
+                i === dayIndex ? b.classList.add('day-btn-active') : b.classList.remove('day-btn-active');
             });
+            // Update center current day button in bottom bar
+            document.getElementById('currentDayBtn').innerText = `Day ${trip.days[dayIndex].id}`;
 
-            let html = `<div class="mb-4 fade-in">
-                <span class="text-xs font-bold text-primary tracking-widest uppercase">Day ${data.day} • ${data.date}</span>
-                <h2 class="text-2xl font-bold text-gray-900">${data.location}</h2>
-            </div>`;
+            const day = trip.days[dayIndex];
+            const container = document.getElementById('timeline');
+            
+            let html = `<div class="mb-5 animate-fade"><h3 class="text-xl font-bold">${day.date}</h3><p class="text-primary font-medium">📍 ${day.location}</p></div>`;
+            
+            html += day.events.map(evt => {
+                let icon = '📍';
+                let bgClass = 'bg-white';
+                if(evt.type === 'food') { icon = '🍽️'; bgClass = 'bg-orange-50 border-orange-100'; }
+                if(evt.type === 'transport') { icon = '🚆'; bgClass = 'bg-blue-50 border-blue-100'; }
+                if(evt.type === 'stay') { icon = '🛏️'; bgClass = 'bg-purple-50 border-purple-100'; }
+                if(evt.type === 'misc') { icon = '🛒'; bgClass = 'bg-slate-50 border-slate-100'; }
 
-            data.events.forEach(e => {
-                let dotColor = 'bg-gray-300';
-                if(e.type === 'food') dotColor = 'bg-orange-400';
-                if(e.type === 'transport') dotColor = 'bg-blue-500';
-                if(e.type === 'sight') dotColor = 'bg-primary';
+                const gMapUrl = `https://www.google.com/maps/search/${encodeURIComponent(evt.spot)}`;
 
-                html += `
-                <div class="relative pl-10 pb-8 fade-in">
-                    <div class="timeline-line"></div>
-                    <div class="timeline-dot ${dotColor}"></div>
-                    <div class="flex items-center text-xs font-bold text-gray-400 mb-1">${e.time}</div>
-                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 active:scale-95 transition-transform" onclick="window.open('https://www.google.com/maps/search/${encodeURIComponent(e.name)}')">
-                        <div class="font-bold text-gray-800 flex justify-between">
-                            ${e.name}
-                            <span class="text-gray-300">›</span>
-                        </div>
-                        ${e.desc ? `<p class="text-xs text-gray-500 mt-1">${e.desc}</p>` : ''}
+                return `
+                <div class="relative pl-10 pb-8 animate-fade ${evt.dur === 'End' ? '' : 'timeline-line'}">
+                    <div class="absolute left-0 top-0 bg-gray-900 border-4 border-gray-100 text-white text-[10px] font-bold rounded-full w-12 h-12 flex items-center justify-center shadow-md z-10 font-mono">
+                        ${evt.time}
                     </div>
+                    
+                    <a href="${gMapUrl}" target="_blank" class="block p-5 rounded-3xl shadow-sm border ${bgClass} hover:border-primary transition-colors">
+                        <div class="flex justify-between items-start">
+                            <div class="space-y-1">
+                                <h4 class="font-bold text-gray-900 flex items-center gap-1.5">${icon} ${evt.spot}</h4>
+                                ${evt.desc ? `<p class="text-xs text-slate-500">${evt.desc}</p>` : ''}
+                                <span class="inline-block px-2.5 py-0.5 bg-gray-100 text-gray-600 text-[10px] font-bold rounded-full">停留: ${evt.dur}</span>
+                            </div>
+                            <span class="text-primary text-xl">›</span>
+                        </div>
+                    </a>
                 </div>`;
-            });
-            timeline.innerHTML = html;
+            }).join('');
+            
+            container.innerHTML = html;
         }
 
-        function initApp() {
-            const nav = document.getElementById('day-nav');
-            tripData.forEach((d, i) => {
-                const btn = document.createElement('div');
-                btn.className = `day-card day-btn flex flex-col items-center py-3 rounded-2xl border border-gray-100 bg-white transition-all cursor-pointer`;
-                btn.innerHTML = `<span class="text-[10px] text-gray-400">Day</span><span class="text-lg font-bold">${d.day}</span>`;
-                btn.onclick = () => {
-                    renderDay(i);
-                    btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-                };
-                nav.appendChild(btn);
+        function filterFood(type) {
+            const list = document.getElementById('foodList');
+            document.querySelectorAll('.food-filter-btn').forEach(b => {
+                b.classList.remove('active-food-filter', 'text-white', 'bg-primary');
+                b.classList.add('bg-white', 'border', 'border-slate-200', 'text-slate-600');
             });
-            renderDay(0);
+            event.target.classList.remove('bg-white', 'border', 'border-slate-200', 'text-slate-600');
+            event.target.classList.add('active-food-filter', 'text-white', 'bg-primary');
+
+            const filtered = type === 'all' ? trip.foods : trip.foods.filter(f => f.city === type || (type === 'HighCP' && f.cp));
+            
+            list.innerHTML = filtered.map(f => `
+                <a href="https://www.google.com/maps/search/${encodeURIComponent(f.name)}" target="_blank" class="block bg-white p-5 rounded-3xl shadow-sm border border-slate-100 hover:border-primary transition-colors flex justify-between items-center relative">
+                    ${f.cp ? '<span class="absolute top-2 right-2 text-xl">🔥</span>' : ''}
+                    <div>
+                        <span class="text-[10px] font-bold px-2 py-0.5 bg-slate-100 rounded text-slate-500 tracking-wider">${f.city}</span>
+                        <h4 class="font-bold text-gray-900 mt-1">${f.name}</h4>
+                        <p class="text-xs text-slate-500">${f.note}</p>
+                    </div>
+                    <span class="text-primary text-xl">›</span>
+                </a>
+            `).join('');
         }
 
-        let chartInited = false;
-        function initChart() {
-            if(chartInited) return;
-            const ctx = document.getElementById('cityChart').getContext('2d');
+        // --- Chart.js 初始化 ---
+        let tripChartInited = false;
+        function initTripChart() {
+            if (tripChartInited) return;
+            const ctx = document.getElementById('tripChart').getContext('2d');
             new Chart(ctx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['維也納', '薩爾斯堡', '布達佩斯'],
+                    labels: ['維也納', '薩爾斯堡 (含Hallstatt)', '布達佩斯'],
                     datasets: [{
-                        data: [10, 3, 4],
-                        backgroundColor: ['#D4AF37', '#2D5A27', '#C8102E'],
-                        hoverOffset: 4
+                        data: [10, 3, 4], // 天數分配
+                        backgroundColor: ['#D4AF37', '#2F5233', '#CD212A'],
+                        borderWidth: 0
                     }]
                 },
-                options: { cutout: '70%', plugins: { legend: { position: 'bottom' } } }
+                options: { cutout: '70%', plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 6, font: { size: 12 } } } } }
             });
-            chartInited = true;
+            tripChartInited = true;
         }
 
-        window.onload = initApp;
+        // --- 初始化頁面 ---
+        window.onload = function() {
+            switchTab('dashboard');
+            renderDaySelector();
+            renderTimeline(0); // 預設顯示 Day 1
+            filterFood('all'); // 預設顯示所有美食
+        };
     </script>
 </body>
 </html>
